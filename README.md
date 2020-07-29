@@ -13,3 +13,17 @@ In the SIRD model, we use the letters "S", "I", "R" and "D" to represent the num
 and the dynamics of the model consists of some individuals from "S" going to "I" and then going to "R" or "D".
 To represent the rate which theese transitions happen, there are used three parameters β, γ and ε that indicates the rate from "S" to "I", from "I" to "R" and from "I" to "D".
 The model and the transitions can de visualized in the equations and the picture bellow:
+
+### SIRD Model
+<p align="center"> 
+<img src="./img/SIRD_model_equation.png">
+</p>
+
+
+### SIRD Discrete Model
+<p align="center"> 
+<img src="./img/SIRD_equation_iterative.png">
+</p>
+
+
+![reference data](./img/FiguraSIRD.png)
