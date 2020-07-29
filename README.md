@@ -40,7 +40,13 @@ The reference series used have β = 0.45, γ = 0.19 and ε = 0.015, and to simul
 <img src="./img/FiguraSIRD.png">
 </p>
 
+## Program Usage
+After dowloading the source coded from GitHub, the project compilation can be done via "make" using the "make all" command, and the execution can be done using "make run".
+The compilation and running can also be done manually for the files [main.c](main.c), [model.c](model.c) and [series.c](series.c), with a C Compiler of your choice, but here the project was tested only with GCC.
+The program has no dependency of any external C library, but it needs GNUPlot installed on the PC's terminal, because it's used to plot the result image.
+
 ## Video
+A video (in portuguese) explaining the poject can be found here
 
 ## Results
 <p align="center"> 
