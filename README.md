@@ -1,4 +1,4 @@
-# Genetical Algorithm for Epidemic Model parameter ajusting
+# Genetic Algorithm for Epidemic Model parameter adjustment
 
 ## The Epidemic Model
 When studing an epidemic, many models can be used to describe the disease evolution.
