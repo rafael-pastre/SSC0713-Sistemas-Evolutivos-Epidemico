@@ -3,6 +3,7 @@
 #include <float.h>
 #include <stdlib.h>
 #include <math.h>
+#include <time.h>
 
 #include "model.h"
 #include "series.h"
@@ -16,7 +17,7 @@
 #endif
 
 #define SERIES_LENGHT	146
-#define NUM_MODELS		10
+#define NUM_MODELS		5
 #define TAX_MUT 		0.25
 
 	
@@ -45,11 +46,13 @@ int main(){
 	// Other
 	char ch = 's';
 	
+	srand(time(NULL));
+	
 	
 	// Read input data
 	#ifdef REAL_DATA
 	double dummy1, dummy2;
-	data_ref = fopen("brasil-data.csv", "rt");
+	data_ref = fopen("./data/brasil-data.csv", "rt");
 	
 	for(int i = 0; i < SERIES_LENGHT; i++){
 		fscanf(data_ref, "%lf,%lf,%lf,%lf", &dummy1, T+i ,&dummy2, D+i);
@@ -58,7 +61,7 @@ int main(){
 	
 	fclose(data_ref);
 	#else
-	data_ref = fopen("data.csv", "rt");
+	data_ref = fopen("./data/data.csv", "rt");
 	
 	for(int i = 0; i < SERIES_LENGHT; i++){
 		fscanf(data_ref, "%lf,%lf", T+i, D+i);
@@ -85,13 +88,13 @@ int main(){
 	}
 	
 	// Preprare gnuplot script to plot the best
-	plot_out = fopen("plot_script.gp", "wt");
+	plot_out = fopen("./scripts/plot_script.gp", "wt");
 	fprintf(plot_out, "set term png\n");
-	fprintf(plot_out, "set output \"plot.png\"\n");
+	fprintf(plot_out, "set output \"./img/plot.png\"\n");
 	fprintf(plot_out, "set title 'Melhor Modelo - AG'\n");
 	fprintf(plot_out, "set xrange [0:%d]\n", SERIES_LENGHT);
 	fprintf(plot_out, "set yrange [0:%d]\n", POP_SIZE);
-	fprintf(plot_out, "plot 'output.csv' using 1:2 t'S', 'output.csv' using 1:3 t'I', 'output.csv' using 1:4 t'R', 'output.csv' using 1:5 t'D'\n");
+	fprintf(plot_out, "plot './data/output.csv' using 1:2 t'S', './data/output.csv' using 1:3 t'I', './data/output.csv' using 1:4 t'R', './data/output.csv' using 1:5 t'D'\n");
 	fclose(plot_out);
 	
 	// Evolve Models
@@ -113,13 +116,13 @@ int main(){
 		
 		if(kbhit() && getch() == 'q' || geracao % 10 == 0) {
 			// Save best in csv file
-			data_out = fopen("output.csv", "wt");
+			data_out = fopen("./data/output.csv", "wt");
 			for(int i = 0; i < SERIES_LENGHT; i++)
 				fprintf(data_out, "%d, %lf, %lf, %lf, %lf\n", i, model_pop[the_best]->S[i], model_pop[the_best]->I[i], model_pop[the_best]->R[i], model_pop[the_best]->D[i]);
 			fclose(data_out);
 			
 			// Print csv with the best data using gnuplot
-			system("gnuplot plot_script.gp");
+			system("gnuplot ./scripts/plot_script.gp");
 			
 			// Print the best data on console
 			printf("The best(%d): %lf\n", the_best, fit[the_best]);
@@ -177,13 +180,88 @@ int elitismo(Model* model_pop[NUM_MODELS], double fit[NUM_MODELS]) {
 		model_pop[i]->epsilon = (model_pop[i]->epsilon + model_pop[the_best]->epsilon) / 2.0;
 
 		// Mutação
-		model_pop[i]->beta = model_pop[i]->beta + ((double)rand()/(double)rand()) * TAX_MUT;
-		model_pop[i]->gamma = model_pop[i]->gamma + ((double)rand()/(double)rand()) * TAX_MUT;
-		model_pop[i]->epsilon = model_pop[i]->epsilon + ((double)rand()/(double)rand()) * TAX_MUT;
+		model_pop[i]->beta += model_pop[i]->beta*((double)rand()/RAND_MAX) * TAX_MUT;
+		model_pop[i]->beta -= model_pop[i]->beta*((double)rand()/RAND_MAX) * TAX_MUT;
+		model_pop[i]->gamma += model_pop[i]->gamma*((double)rand()/RAND_MAX) * TAX_MUT;
+		model_pop[i]->gamma -= model_pop[i]->gamma*((double)rand()/RAND_MAX) * TAX_MUT;
+		model_pop[i]->epsilon += model_pop[i]->epsilon*((double)rand()/RAND_MAX) * TAX_MUT;
+		model_pop[i]->epsilon -= model_pop[i]->epsilon*((double)rand()/RAND_MAX) * TAX_MUT;
 		
     }	
 	return the_best;
 }
+
+void torneio2(Model* model_pop[NUM_MODELS], double fit[NUM_MODELS]) {
+	Model* model_pop_aux[NUM_MODELS];
+    int a, b, pai1, pai2;
+	int the_best = 0;
+	double best_fit = DBL_MAX;
+	double f;
+
+	// Encontra Melhor
+	for(int i = 0; i < NUM_MODELS; i++){
+		f = fitness(model_pop[i]);
+		if(f < best_fit){
+			the_best = i;
+			best_fit = f;
+		}
+	}
+	
+	// Allocation of Auxiliar Models
+	for(int i = 0; i < NUM_MODELS; i++){
+		model_pop_aux[i] = allocate_model(SERIES_LENGHT);
+		set_initial_conditions(model_pop_aux[i], POP_SIZE, 1, 0, 0);
+	}
+	
+	// Torneio
+    for (int i = 0; i <= NUM_MODELS; i++) {
+        
+		//Pula The Best
+		if (i == the_best) {
+             continue;
+        }
+
+        // Sorteia dois individuos para 1º torneio
+        a = (rand() % NUM_MODELS);
+        b = (rand() % NUM_MODELS);
+        
+		if (fit[a] > fit[b]) pai1 = a;
+        else pai1 = b;
+
+        // Sorteia mais dois individuos para 2º torneio
+        a = (rand() % NUM_MODELS);
+        b = (rand() % NUM_MODELS);
+        
+		if (fit[a] > fit[b]) pai2 = a;
+        else pai2 = b;
+
+        // Crossover
+		model_pop_aux[i]->beta = (model_pop[pai1]->beta + model_pop[pai2]->beta) / 2.0;
+		model_pop_aux[i]->gamma = (model_pop[pai1]->gamma + model_pop[pai2]->gamma) / 2.0;
+		model_pop_aux[i]->epsilon = (model_pop[pai1]->epsilon + model_pop[pai2]->epsilon) / 2.0;
+
+        // Mutação
+		model_pop_aux[i]->beta += model_pop_aux[i]->beta*((double)rand()/RAND_MAX) * TAX_MUT;
+		model_pop_aux[i]->beta -= model_pop_aux[i]->beta*((double)rand()/RAND_MAX) * TAX_MUT;
+		model_pop_aux[i]->gamma += model_pop_aux[i]->gamma*((double)rand()/RAND_MAX) * TAX_MUT;
+		model_pop_aux[i]->gamma -= model_pop_aux[i]->gamma*((double)rand()/RAND_MAX) * TAX_MUT;
+		model_pop_aux[i]->epsilon += model_pop_aux[i]->epsilon*((double)rand()/RAND_MAX) * TAX_MUT;
+		model_pop_aux[i]->epsilon -= model_pop_aux[i]->epsilon*((double)rand()/RAND_MAX) * TAX_MUT;
+    }
+    
+	//Copia o População auxiliar para população principal
+    for (int i = 0; i <= NUM_MODELS; i++){
+		//Pula The Best
+		if (i == the_best) {
+             continue;
+        }
+		
+		model_pop[i]->beta = model_pop_aux[i]->beta;
+		model_pop[i]->gamma = model_pop_aux[i]->gamma;
+		model_pop[i]->epsilon = model_pop_aux[i]->epsilon;
+	}
+}
+
 
 int predacao(Model* model_pop[NUM_MODELS], double fit[NUM_MODELS]) {
 	int the_worst = 0;
