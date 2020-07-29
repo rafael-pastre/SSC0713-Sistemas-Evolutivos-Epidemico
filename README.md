@@ -52,3 +52,5 @@ A video (in portuguese) explaining the poject can be found here
 <p align="center"> 
 <img src="./img/example_plot/example.gif">
 </p>
+
+Parameters found: β = 0.460017, γ = 0.198219 and ε = 0.015623
