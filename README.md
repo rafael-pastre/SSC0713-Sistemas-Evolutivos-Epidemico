@@ -46,7 +46,7 @@ The compilation and running can also be done manually for the files [main.c](mai
 The program has no dependency of any external C library, but it needs GNUPlot installed on the PC's terminal, because it's used to plot the result image.
 
 ## Video
-A video (in portuguese) explaining the poject can be found here
+A video (in portuguese) explaining the poject can be found [here](https://drive.google.com/file/d/1QN2QIYmdgVau9I4y2jC6j2h2pXnCcsO3/view?usp=sharing)
 
 ## Results
 <p align="center"> 
