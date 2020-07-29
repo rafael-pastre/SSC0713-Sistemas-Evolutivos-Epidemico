@@ -108,7 +108,7 @@ int main(){
 
 		// Genetical functions
 		the_best = elitismo(model_pop, fit);
-
+		
 		predacao(model_pop, fit);
 		
 		// Print best and asks for new generation
@@ -146,14 +146,9 @@ double fitness (Model* model) {
 	
 	for(int i = 0; i < SERIES_LENGHT; i++)
 		Taux[i] = model->I[i] + model->R[i];
-		
-	//return	dist_euclidian(T, Taux, SERIES_LENGHT) +
-	//		dist_euclidian(D, model->D, SERIES_LENGHT) +
-	//		1*dist_DWT(T, Taux, SERIES_LENGHT, SERIES_LENGHT) +
-	//		1*dist_DWT(D, model->D, SERIES_LENGHT, SERIES_LENGHT);
 	
 	return dist_euclidian(T, Taux, SERIES_LENGHT) + dist_euclidian(D, model->D, SERIES_LENGHT);
-	//return dist_DWT(T, Taux, SERIES_LENGHT, SERIES_LENGHT) + dist_DWT(D, model->D, SERIES_LENGHT, SERIES_LENGHT);
+
 }
 
 int elitismo(Model* model_pop[NUM_MODELS], double fit[NUM_MODELS]) {
@@ -189,77 +184,6 @@ int elitismo(Model* model_pop[NUM_MODELS], double fit[NUM_MODELS]) {
 		
     }	
 	return the_best;
-}
-
-void torneio2(Model* model_pop[NUM_MODELS], double fit[NUM_MODELS]) {
-	Model* model_pop_aux[NUM_MODELS];
-    int a, b, pai1, pai2;
-	int the_best = 0;
-	double best_fit = DBL_MAX;
-	double f;
-
-	// Encontra Melhor
-	for(int i = 0; i < NUM_MODELS; i++){
-		f = fitness(model_pop[i]);
-		if(f < best_fit){
-			the_best = i;
-			best_fit = f;
-		}
-	}
-	
-	// Allocation of Auxiliar Models
-	for(int i = 0; i < NUM_MODELS; i++){
-		model_pop_aux[i] = allocate_model(SERIES_LENGHT);
-		set_initial_conditions(model_pop_aux[i], POP_SIZE, 1, 0, 0);
-	}
-	
-	// Torneio
-    for (int i = 0; i <= NUM_MODELS; i++) {
-        
-		//Pula The Best
-		if (i == the_best) {
-             continue;
-        }
-
-        // Sorteia dois individuos para 1º torneio
-        a = (rand() % NUM_MODELS);
-        b = (rand() % NUM_MODELS);
-        
-		if (fit[a] > fit[b]) pai1 = a;
-        else pai1 = b;
-
-        // Sorteia mais dois individuos para 2º torneio
-        a = (rand() % NUM_MODELS);
-        b = (rand() % NUM_MODELS);
-        
-		if (fit[a] > fit[b]) pai2 = a;
-        else pai2 = b;
-
-        // Crossover
-		model_pop_aux[i]->beta = (model_pop[pai1]->beta + model_pop[pai2]->beta) / 2.0;
-		model_pop_aux[i]->gamma = (model_pop[pai1]->gamma + model_pop[pai2]->gamma) / 2.0;
-		model_pop_aux[i]->epsilon = (model_pop[pai1]->epsilon + model_pop[pai2]->epsilon) / 2.0;
-
-        // Mutação
-		model_pop_aux[i]->beta += model_pop_aux[i]->beta*((double)rand()/RAND_MAX) * TAX_MUT;
-		model_pop_aux[i]->beta -= model_pop_aux[i]->beta*((double)rand()/RAND_MAX) * TAX_MUT;
-		model_pop_aux[i]->gamma += model_pop_aux[i]->gamma*((double)rand()/RAND_MAX) * TAX_MUT;
-		model_pop_aux[i]->gamma -= model_pop_aux[i]->gamma*((double)rand()/RAND_MAX) * TAX_MUT;
-		model_pop_aux[i]->epsilon += model_pop_aux[i]->epsilon*((double)rand()/RAND_MAX) * TAX_MUT;
-		model_pop_aux[i]->epsilon -= model_pop_aux[i]->epsilon*((double)rand()/RAND_MAX) * TAX_MUT;
-    }
-    
-	//Copia o População auxiliar para população principal
-    for (int i = 0; i <= NUM_MODELS; i++){
-		//Pula The Best
-		if (i == the_best) {
-             continue;
-        }
-		
-		model_pop[i]->beta = model_pop_aux[i]->beta;
-		model_pop[i]->gamma = model_pop_aux[i]->gamma;
-		model_pop[i]->epsilon = model_pop_aux[i]->epsilon;
-	}
 }
 
 
